@@ -4,13 +4,31 @@ import WebKit
 
 // Struct to decode the arguments for the `enable` command
 struct EnableArgs: Decodable {
-    let config: [String: Any]?
+    let config: [String: String]?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        config = try container.decodeIfPresent([String: String].self, forKey: .config)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case config
+    }
 }
 
-// Struct to decode the arguments for the `disable` command
 struct DisableArgs: Decodable {
-    let config: [String: Any]?
+    let config: [String: String]?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        config = try container.decodeIfPresent([String: String].self, forKey: .config)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case config
+    }
 }
+
 
 // SafeArea implementation stub
 class SafeArea {
@@ -57,9 +75,10 @@ struct AppearanceConfig {
 class SafeAreaPlugin: Plugin {
     private var safeArea: SafeArea?
     private var isEnabled: Bool = false
-
+    private var webView: WKWebView?
+    private var bridge: SomeBridgeType?
     // Plugin initialization
-    override func load() {
+    func load() {
         guard let webView = self.webView else { return }
         self.safeArea = SafeArea(webView: webView)
 
@@ -72,7 +91,7 @@ class SafeAreaPlugin: Plugin {
         }
     }
 
-    override func pause() {
+    func pause() {
         self.safeArea?.resetDecorFitsSystemWindows()
         super.pause()
     }
